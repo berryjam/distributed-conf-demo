@@ -7,16 +7,35 @@ import (
 	"github.com/samuel/go-zookeeper/zk"
 )
 
-func main(){
+var content = "hello"
+
+func main() {
+	unstop := make(chan int)
 	c, _, err := zk.Connect([]string{"10.96.90.6"}, time.Second) //*10)
 	if err != nil {
 		panic(err)
 	}
-	children, stat, ch, err := c.ChildrenW("/")
+	bytes, _, ch, err := c.GetW("/didi")
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("%+v %+v\n", children, stat)
-	e := <-ch
-	fmt.Printf("%+v\n", e)
+	content = string(bytes)
+	go func() {
+		for {
+			<-ch
+			bytes, _, ch, err = c.GetW("/didi")
+			if err != nil {
+				panic(err)
+			}
+			content = string(bytes)
+		}
+	}()
+	go func() {
+		for {
+			fmt.Printf("%v\n", content)
+			time.Sleep(2 * time.Second)
+		}
+	}()
+
+	<-unstop
 }
