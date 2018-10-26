@@ -7,7 +7,7 @@ import (
 	"github.com/samuel/go-zookeeper/zk"
 )
 
-var content = "hello"
+var content string
 
 func main() {
 	unstop := make(chan int)
