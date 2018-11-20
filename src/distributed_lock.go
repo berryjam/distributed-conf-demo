@@ -42,11 +42,11 @@ func lock() string {
 	for {
 		children, _, _ := zkHandler.Children(fmt.Sprintf("%s", "/didi"))
 		tmp := strings.Split(n, "-")
-		nNum, _ := strconv.Atoi("1" + tmp[1])
+		nNum, _ := strconv.Atoi(formatSequenctialNodePath(tmp[1]))
 		isLowestNode := true
 		for _, child := range children {
 			tmp = strings.Split(child, "-")
-			childNum, _ := strconv.Atoi("1" + tmp[1])
+			childNum, _ := strconv.Atoi(formatSequenctialNodePath(tmp[1]))
 			if nNum > childNum {
 				isLowestNode = false
 				break
@@ -66,6 +66,17 @@ func lock() string {
 func unlock(node string) {
 	_, stat, _ := zkHandler.Get(node)
 	zkHandler.Delete(node, stat.Version)
+}
+
+func formatSequenctialNodePath(path string) string {
+	firstNonZeroIdx := -1
+	for idx, r := range path {
+		if r != '0' {
+			firstNonZeroIdx = idx
+			break
+		}
+	}
+	return path[firstNonZeroIdx:]
 }
 
 func main() {
